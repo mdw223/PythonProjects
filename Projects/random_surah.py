@@ -150,13 +150,32 @@ rev_text = reshaped_text[::-1]  # slice backwards
 print(rev_text) '''
 
 def choose_surah():
-    surah_num = random.randint(0, len(surahs))
+    return random.randint(0, len(surahs))
+
+def choose_surahs():
+    surah_1 = choose_surah()
+    surah_2 = choose_surah()
+    ensure(surah_1, surah_2)
+    return [convert(surah_1), convert(surah_2)]
+
+# ensure surahs
+def ensure(surah_1, surah_2):
+    while surah_1 == surah_2:
+        surah_2 = choose_surah()
+
+def convert(num):
+    surah_num = num
     surah_eng = surahs[surah_num][0]
     text_to_be_reshaped = surahs[surah_num][1]
     reshaped_text = arabic_reshaper.reshape(text_to_be_reshaped)
     surah = reshaped_text[::-1]
     return f"{str(surah_num)} {surah_eng} {surah}"
-# ensure surahs
+
+def output():
+    surah_pair = choose_surahs()
+    print(f'Read surahs {surah_pair[0]} and {surah_pair[1]}')
 
 
-print(f'Read surah {choose_surah()}') # add english in dictionary too
+
+
+output()
