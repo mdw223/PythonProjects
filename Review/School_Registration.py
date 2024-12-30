@@ -23,13 +23,15 @@ class School:
         return str(self.classes)
     
     def get_students(self):
-        return str(self.students)
+        return self.students
 
     def add_student_to_school(self, student):
-        self.students.append(student)
+        if student not in self.students:
+            self.students.append(student)
 
-    def add_class_to_school(self, class_name):
-        self.classes.append(class_name)
+    def add_class_to_school(self, Class):
+        if Class not in self.classes:
+            self.classes.append(Class)
 
     def get_class(self, class_name):
         for c in self.classes:
@@ -63,7 +65,8 @@ class Class:
         self.name = name
 
     def add_to_class(self, student):
-        self.students.append(student)
+        if student not in self.students:
+            self.students.append(student)
 
     def get_student(self, student_name):
         for s in self.students:
@@ -91,11 +94,24 @@ school_1 = School("South Garner High")
 list_of_classes = ['Math', 'Science', 'Gym', "Art", 'English']
 for c in list_of_classes:
     school_1.add_class_to_school(c)
-print('The number of classes at', school_1.get_name(), "is", str(len(school_1.classes)))
-print(f'Here are the classes they offer: {school_1.get_classes()}')
-students = ['Adam', 'Brian', 'Maddie', 'Blake', 'Fisher', 'Simon', 'Luke', 'Kimberly', 'David', 'Ralph']
+print(f'Welcome to {school_1.get_name()}.\nThe number of classes here is {str(len(school_1.classes))}')
+print(f'They are: {school_1.get_classes()}')
+students = [Student('Adam', 16, 10), Student('Brian', 17, 11), Student('Maddie', 17, 11), Student('Blake', 18, 12),
+            Student('Fisher', 15, 9), Student('Simon', 15, 10), Student('Luke', 15, 10), Student('Kimberly', 15, 10), Student('David', 16, 11), Student('Ralph', 18, 12)]
 for s in students:
     school_1.add_student_to_school(s)
-print(f'Here are the students attending the school: {school_1.get_students()}')
+print(f'Here are the number of students attending the school: {len(school_1.get_students())}')
+
+loop = True
+while loop:
+    user = input("Would you like to be principal? (Yes/No): ")
+    if user == "Yes":
+        print(f"Enter a command to run...") # TODO add more code here 
+        break
+    elif user == "No":
+        loop = False
+        
+
+
 
 
