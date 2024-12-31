@@ -1,3 +1,25 @@
+# ask user whether he wants to select only from a certain juz
+
+''' or anywhere in the Quran...
+
+make it so the surah with smaller number is displayed to be read first
+
+can have favorites folder of surahs to randomly pick from 
+
+
+make the UI to make it look nice and interactive
+
+also allow for a certain ayah in that surah like kursee 
+
+can upload it to app store
+
+a person can have an account to save their favs
+
+can have a recently read folder of surahs.
+
+Can also make a salah couter app for make ups'''
+
+
 class Surah:
     def __init__(self, num, name_eng, name_ar):
         self.num = num
@@ -22,10 +44,73 @@ class Surah:
         return self.name_ar
     
     def __gt__(self, other):
-        if self.num > other.get_num():
-            return True
+        if isinstance(other, Surah):
+            if self.num > other.get_num():
+                return True
+            else:
+                return False
         else:
-            return False
+            return None
+
+class Juz:
+    def __init__(self, number, name_eng, name_ar, end_surah, start_surah):
+        self.number = number
+        self.name_eng = name_eng
+        self.name_ar = name_ar
+        self.start_surah = start_surah
+        self.end_surah = end_surah
+
+    # Getter methods
+    def get_number(self):
+        return self.number
+
+    def get_name_eng(self):
+        return self.name_eng
+
+    def get_name_ar(self):
+        return self.name_ar
+
+    def get_start_surah(self):
+        return self.start_surah
+
+    def get_end_surah(self):
+        return self.end_surah
+
+    
+
+# List of Juz objects with flipped start and end Surah numbers and no Ayah numbers
+juz_list = [
+    Juz(1, "Alif Lam Meem", "الم", 2, 1),
+    Juz(2, "Sayaqool", "سيقول", 2, 2),
+    Juz(3, "Tilkal Rusul", "تلك الرسل", 3, 2),
+    Juz(4, "Lan Tana Loo", "لن تنالوا", 4, 3),
+    Juz(5, "Wal Mohsanat", "والمحصنات", 4, 4),
+    Juz(6, "La Yuhibbullah", "لا يحب الله", 5, 4),
+    Juz(7, "Wa Iza Samiu", "وإذا سمعوا", 6, 5),
+    Juz(8, "Wa Lau Annana", "ولو أننا", 7, 6),
+    Juz(9, "Qalal Malao", "قال الملأ", 8, 7),
+    Juz(10, "Wa A'lamu", "واعلموا", 9, 8),
+    Juz(11, "Yatazeroon", "يعتذرون", 11, 9),
+    Juz(12, "Wa Mamin Da'abat", "وما من دابة", 12, 11),
+    Juz(13, "Wa Ma Ubrioo", "وما أبرئ", 14, 12),
+    Juz(14, "Rubama", "ربما", 16, 15),
+    Juz(15, "Subhanallazi", "سبحان الذي", 18, 17),
+    Juz(16, "Qal Alam", "قال ألم", 20, 18),
+    Juz(17, "Aqtarabo", "اقتربت", 22, 21),
+    Juz(18, "Qadd Aflaha", "قد أفلح", 25, 23),
+    Juz(19, "Wa Qalallazina", "وقال الذين", 27, 25),
+    Juz(20, "A'man Khalaq", "أمن خلق", 29, 27),
+    Juz(21, "Utlu Ma Oohi", "اتل ما أوحي", 33, 29),
+    Juz(22, "Wa Manyaqnut", "ومن يقنت", 36, 33),
+    Juz(23, "Wa Mali", "وما لي", 39, 36),
+    Juz(24, "Faman Azlam", "فمن أظلم", 41, 39),
+    Juz(25, "Ilaahe Yuruddu", "إليه يرد", 45, 41),
+    Juz(26, "Ha'a Meem", "حم", 51, 46),
+    Juz(27, "Qala Fama Khatbukum", "قال فما خطبكم", 57, 51),
+    Juz(28, "Qadd Aflaha", "قد أفلح", 66, 58),
+    Juz(29, "Tabarakalladhi", "تبارك الذي", 77, 67),
+    Juz(30, "Amma Yatasa'aloon", "عم يتساءلون", 114, 78)
+]
 
 # List of Surah objects
 surahs = [
@@ -145,49 +230,39 @@ surahs = [
     Surah(114, "An-Nas", "الناس")
 ]
 
-
-# ask user whether he wants to select only from a certain juz
-
-''' or anywhere in the Quran...
-
-make it so the surah with smaller number is displayed to be read first
-
-can have favorites folder of surahs to randomly pick from 
-
-
-make the UI to make it look nice and interactive
-
-also allow for a certain ayah in that surah like kursee 
-
-can upload it to app store
-
-a person can have an account to save their favs
-
-can have a recently read folder of surahs.
-
-Can also make a salah couter app for make ups'''
-
 # randomly select two surahs in order and display
 import random
 
 # install: pip install --upgrade arabic-reshaper
 import arabic_reshaper
 
-def choose_surah_num():
-    return random.randint(0, len(surahs))
+def choose_surah_num(start, end):
+    return random.randint(start, end)
 
-def choose_surahs():
-    surah_1 = surahs[choose_surah_num()]
-    surah_2 = surahs[choose_surah_num()]
-    
+def choose_surahs(start, end):
+    #gets the surah range based on given juz start and end 
+    s = juz_list[start].get_start_surah() 
+    e = juz_list[end].get_end_surah()
+
+    print(start)
+    print(end)
+
+    if s > e: #put in order 
+        temp = s
+        s = e
+        e = temp
+
+    surah_1 = surahs[choose_surah_num(s, e)]
+    surah_2 = surahs[choose_surah_num(s, e)]
+
     return ensure(surah_1, surah_2)
 
 ''' make sure the two surahs aren't the same and order them in ascending order '''
 def ensure(surah_1, surah_2):
     while surah_1.__eq__(surah_2):
-        surah_2 = choose_surah_num()
+        surah_2 = choose_surah_num(surah_1.get_num(), surah_2.get_num())
     
-    if surah_1.__gt__(surah_2):
+    if surah_1.get_num() > surah_2.get_num():
         return [surah_2, surah_1]
     else:
         return [surah_1, surah_2]
@@ -200,10 +275,37 @@ def convert(surah):
     surah = reshaped_text[::-1] # slice backwards  
     return f"{str(surah_num)} {surah_eng} {surah}"
 
-def output():
-    surah_pair = choose_surahs()
-    
-    print(f'Read surahs {convert(surah_pair[0])} and {convert(surah_pair[1])}')
+def user():
+    loop = True
+    while loop:
+        cont = True
+        while cont:
+            #map iterates through the parts of the string and initializes them for us 
+            start = 1
+            end = 30
+            start, end = map(int, input("Choose a range of juz to choose from (1-30): ").split('-'))
+            if (start > end) or (start < 1) or (start > 30) or (end < 1) or (end > 30):
+                print("Incorrect format")
+            else:
+                cont = False
 
-output()
+        surah_pair = choose_surahs(start - 1, end - 1) # the list is 0 indexed
+        
+        print(f'Read surahs {convert(surah_pair[0])} and {convert(surah_pair[1])}')  
+
+        again = True
+        while again: 
+            result = input("Choose again? (y/n): ")   #TODO test 
+            if result == 'y':
+                again = False
+            elif result == 'n':
+                again = False
+                loop = False
+            else:
+                again = False 
+
+        
+user()
+
+#TODO make it so if they input a single number like 1 then only choose from juz 1 
 
