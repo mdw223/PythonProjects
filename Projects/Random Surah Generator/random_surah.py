@@ -20,61 +20,9 @@ can have a recently read folder of surahs.
 Can also make a salah couter app for make ups'''
 
 
-class Surah:
-    def __init__(self, num, name_eng, name_ar):
-        self.num = num
-        self.name_eng = name_eng
-        self.name_ar = name_ar
+from Surah import Surah # import Surah class from Surah.py file
 
-    def __eq__(self, other):
-        if isinstance(other, Surah):
-            return self.num == other.num and self.name_eng == other.name_eng and self.name_ar == other.name_ar
-        return False
-    
-    # Getter for number
-    def get_num(self):
-        return self.num
-
-    # Getter for English name
-    def get_name_eng(self):
-        return self.name_eng
-
-    # Getter for Arabic name
-    def get_name_ar(self):
-        return self.name_ar
-    
-    def __gt__(self, other):
-        if isinstance(other, Surah):
-            if self.num > other.get_num():
-                return True
-            else:
-                return False
-        else:
-            return None
-
-class Juz:
-    def __init__(self, number, name_eng, name_ar, end_surah, start_surah):
-        self.number = number
-        self.name_eng = name_eng
-        self.name_ar = name_ar
-        self.start_surah = start_surah
-        self.end_surah = end_surah
-
-    # Getter methods
-    def get_number(self):
-        return self.number
-
-    def get_name_eng(self):
-        return self.name_eng
-
-    def get_name_ar(self):
-        return self.name_ar
-
-    def get_start_surah(self):
-        return self.start_surah
-
-    def get_end_surah(self):
-        return self.end_surah
+from Juz import Juz # import Juz class from Juz.py
 
     
 
@@ -237,6 +185,9 @@ from tracemalloc import start
 # install: pip install --upgrade arabic-reshaper
 import arabic_reshaper
 
+from FormatException import FormatException # import my custom exception class
+#using from... fixed the type error, it didn't recognize the class FormatException
+
 ''' start refers ot the smallest surah number and end refers to the largest surah number to choose from
 split the range into two and choose a random surah from each half
 it checks if the surahs are the same number
@@ -277,21 +228,7 @@ def convert(surah):
     text_to_be_reshaped = surah.get_name_ar()
     reshaped_text = arabic_reshaper.reshape(text_to_be_reshaped)
     surah = reshaped_text[::-1] # slice backwards  
-    return f"{str(surah_num)} {surah_eng} {surah}"
-
-''' custom exception class that inherits from the base class Exception'''
-class FormatException(Exception):
-    message = None
-
-    def __init__(self, message):
-        self.message = message # Call the base class constructor
-
-    def __init__(self):
-        self.message = "Invalid range. Please enter a valid range between 1 and 30."  
-
-    pass
-    
-
+    return f"{str(surah_num)} {surah_eng} {surah}"   
 
 def user():
         cont = True
@@ -304,12 +241,17 @@ def user():
                 if user_input == 'q':
                     cont = False
                     break
-
-                start_juz, end_juz = map(int, user_input.split('-'))
-                if (start_juz > end_juz) or (start_juz < 1) or (start_juz > 30) or (end_juz < 1) or (end_juz > 30):
-                    raise FormatException()
+                elif user_input.isdigit() and int(user_input) >= 1 and int(user_input) <= 30:
+                    # if they input a single number like 1 then only choose from juz 1  
+                    start_juz = int(user_input)
+                    end_juz = int(user_input)
+                else:
+                    start_juz, end_juz = map(int, user_input.split('-'))
+                    if (start_juz > end_juz) or (start_juz < 1) or (start_juz > 30) or (end_juz < 1) or (end_juz > 30):
+                        raise FormatException()
+            
             except FormatException as e: # if in wrong format, will come here 
-                print(e.message)
+                print(e)
                 continue
             except:
                 print("Incorrect format. An example of a correct format is '5-10'.")
@@ -326,7 +268,5 @@ def user():
 
         
 user()
-
-#TODO make it so if they input a single number like 1 then only choose from juz 1 
 
 
