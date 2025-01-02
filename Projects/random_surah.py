@@ -232,40 +232,44 @@ surahs = [
 
 # randomly select two surahs in order and display
 import random
+from tracemalloc import start
 
 # install: pip install --upgrade arabic-reshaper
 import arabic_reshaper
 
+''' start refers ot the smallest surah number and end refers to the largest surah number to choose from
+split the range into two and choose a random surah from each half
+it checks if the surahs are the same number
+'''
 def choose_surah_num(start, end):
-    return random.randint(start, end)
+    if start == end:
+        return [start, end]
+    elif start + 1 == end: # like if start == 1 and end == 2
+        return [start, end]
+    else: # like if start == 1 and end == 3, then 1 + 3 = 4 / 2 = 2 
+        mid = int((start + end) / 2)
+        return [random.randint(start, mid), random.randint(mid + 1, end)]
 
-def choose_surahs(start, end):
+def choose_surahs(start_juz, end_juz):
     #gets the surah range based on given juz start and end 
-    s = juz_list[start].get_start_surah() 
-    e = juz_list[end].get_end_surah()
-
-    print(start)
-    print(end)
+    s = juz_list[start_juz].get_start_surah() 
+    e = juz_list[end_juz].get_end_surah()
 
     if s > e: #put in order 
         temp = s
         s = e
         e = temp
-
-    surah_1 = surahs[choose_surah_num(s, e)]
-    surah_2 = surahs[choose_surah_num(s, e)]
-
-    return ensure(surah_1, surah_2)
-
-''' make sure the two surahs aren't the same and order them in ascending order '''
-def ensure(surah_1, surah_2):
-    while surah_1.__eq__(surah_2):
-        surah_2 = choose_surah_num(surah_1.get_num(), surah_2.get_num())
     
-    if surah_1.get_num() > surah_2.get_num():
-        return [surah_2, surah_1]
-    else:
-        return [surah_1, surah_2]
+    print(f"Look between: the start surah number: {s}. The end surah number: {e} ")
+
+    surah_pair = choose_surah_num(s, e)
+    surah_1 = surahs[surah_pair[0] - 1] # surah list is zero indexed 
+    surah_2 = surahs[surah_pair[1] - 1]
+    print(f"surah_1 is {surah_1.get_num()}")
+    print(f"surah_2 is {surah_2.get_num()}")
+    return [surah_1, surah_2]
+
+    
 
 def convert(surah):
     surah_num = surah.get_num()
@@ -275,37 +279,54 @@ def convert(surah):
     surah = reshaped_text[::-1] # slice backwards  
     return f"{str(surah_num)} {surah_eng} {surah}"
 
+''' custom exception class that inherits from the base class Exception'''
+class FormatException(Exception):
+    message = None
+
+    def __init__(self, message):
+        self.message = message # Call the base class constructor
+
+    def __init__(self):
+        self.message = "Invalid range. Please enter a valid range between 1 and 30."  
+
+    pass
+    
+
+
 def user():
-    loop = True
-    while loop:
         cont = True
         while cont:
             #map iterates through the parts of the string and initializes them for us 
-            start = 1
-            end = 30
-            start, end = map(int, input("Choose a range of juz to choose from (1-30): ").split('-'))
-            if (start > end) or (start < 1) or (start > 30) or (end < 1) or (end > 30):
-                print("Incorrect format")
-            else:
-                cont = False
+            start_juz = 1
+            end_juz = 30
+            try:
+                user_input = input("Choose a range of juz to choose from (1-30) or 'q' to quit: ")
+                if user_input == 'q':
+                    cont = False
+                    break
 
-        surah_pair = choose_surahs(start - 1, end - 1) # the list is 0 indexed
+                start_juz, end_juz = map(int, user_input.split('-'))
+                if (start_juz > end_juz) or (start_juz < 1) or (start_juz > 30) or (end_juz < 1) or (end_juz > 30):
+                    raise FormatException()
+            except FormatException as e: # if in wrong format, will come here 
+                print(e.message)
+                continue
+            except:
+                print("Incorrect format. An example of a correct format is '5-10'.")
+                # pass statement in Python does not skip to the next iteration of a loop. Instead, it is a null operation; when it is executed, nothing happens.
+                continue # If you want to skip to the next iteration of a loop, you should use the continue statement.
+
+            surah_pair = choose_surahs(start_juz - 1, end_juz - 1) # the list is 0 indexed
+            
+            if surah_pair[0] == surah_pair[1]:
+                print(f'Read from surah {convert(surah_pair[0])}')  
+            else:
+                print(f'Read surahs {convert(surah_pair[0])} and {convert(surah_pair[1])}')  
         
-        print(f'Read surahs {convert(surah_pair[0])} and {convert(surah_pair[1])}')  
-
-        again = True
-        while again: 
-            result = input("Choose again? (y/n): ")   #TODO test 
-            if result == 'y':
-                again = False
-            elif result == 'n':
-                again = False
-                loop = False
-            else:
-                again = False 
 
         
 user()
 
 #TODO make it so if they input a single number like 1 then only choose from juz 1 
+
 
