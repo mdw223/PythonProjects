@@ -29,3 +29,14 @@ class Surah:
                 return False
         else:
             return None
+        
+    def to_dict(self):
+        return {
+            "num": self.num,
+            "name_eng": self.name_eng,
+            "name_ar": self.name_ar
+        }
+
+    # Class method to create an object from a dictionary
+    def from_dict(data):
+        return Surah(data["num"], data["name_eng"], data["name_ar"])

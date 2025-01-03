@@ -15,8 +15,6 @@ from Surah import * # import everything from Surah.py file
 
 from Juz import Juz # import Juz class from Juz.py
 
-favorite_surahs = [] # list of favorite surahs
-
 # List of Juz objects with flipped start and end Surah numbers and no Ayah numbers
 juz_list = [
     Juz(1, "Alif Lam Meem", "الم", 2, 1),
@@ -179,6 +177,8 @@ import arabic_reshaper
 from FormatException import FormatException # import my custom exception class
 #using from... fixed the type error, it didn't recognize the class FormatException
 
+from IO_Favourites import load_favourites, save_favourites, get_favourite_surahs
+
 ''' start refers ot the smallest surah number and end refers to the largest surah number to choose from
 split the range into two and choose a random surah from each half
 it checks if the surahs are the same number
@@ -214,16 +214,16 @@ def choose_surahs(s, e):
     # print(f"surah_2 is {surah_2.get_num()}")
     return [surah_1, surah_2]
 
-def choose_favorites():
-    surah_pair = choose_surah_num(0, len(favorite_surahs) - 1)
-    return [favorite_surahs[surah_pair[0]], favorite_surahs[surah_pair[1]]]
+def choose_favourites():
+    surah_pair = choose_surah_num(0, len(get_favourite_surahs()) - 1) 
+    return [get_favourite_surahs()[surah_pair[0]], get_favourite_surahs()[surah_pair[1]]]
 
 def display_favourites():
-    if len(favorite_surahs) == 0:
-        print("You don't have any favorite surahs yet.")
+    if len(get_favourite_surahs()) == 0:
+        print("You don't have any favourite surahs yet.")
     else:
-        print("Your favorite surahs are:")
-        for surah in favorite_surahs:
+        print("Your favourite surahs are:")
+        for surah in get_favourite_surahs():
             print(f"\t{convert(surah)}")
 
 def convert(surah):
@@ -240,7 +240,10 @@ def output_surah_pair(surah_pair):
     else:
         print(f'Read surahs {convert(surah_pair[0])} and {convert(surah_pair[1])}')
 
+
+
 def user():
+    load_favourites()
     cont = True
     while cont:
         #map iterates through the parts of the string and initializes them for us 
@@ -250,10 +253,10 @@ def user():
         menu = "\nMenu: (Enter a number or 'q' to Quit)\
             \n1. Choose a range of juz to select from\
             \n2. Choose a range of surahs to select from\
-            \n3. Choose from your favorite surahs\
-            \n4. View your favorite surahs\
-            \n5. Add a surah to your favorites\
-            \n6. Quit\
+            \n3. Choose from your favourite surahs\
+            \n4. View your favourite surahs\
+            \n5. Add a surah to your favourites\
+            \n6. Remove a surah from your favourites\
             \nEnter your choice: "
         user_input = input(menu)
         if user_input == '1':
@@ -310,42 +313,67 @@ def user():
                 except:
                     print("Incorrect format. An example of a correct format is '5-10'.")
                     continue 
-        elif user_input == '3': # choose from the favorite_surahs list
-            if len(favorite_surahs) == 0:
-                print("You don't have any favorite surahs yet.")
+        elif user_input == '3': # choose from the favourite surahs list
+            if len(get_favourite_surahs()) == 0:
+                print("You don't have any favourite surahs yet.")
                 continue
             else:
-                surah_pair = choose_favorites()
+                surah_pair = choose_favourites()
                 output_surah_pair(surah_pair)
-        elif user_input == '4': # display favorite surahs
+        elif user_input == '4': # display favourite surahs
             display_favourites()
             continue
-        elif user_input == '5': # add a surah to the favorite_surahs list
+        elif user_input == '5': # add a surah to the favourite surahs list
             repeat = True
             while repeat:
-                user_input = input("Enter the surah number you would like to add to your favorites ['q' to Quit, 'm' for Menu]: ")
+                user_input = input("Enter the surah number you would like to add to your favourites ['q' to Quit, 'm' for Menu]: ")
                 if user_input.isdigit() and int(user_input) >= 1 and int(user_input) <= 114:
                     exists = False
-                    for surah in favorite_surahs:
+                    for surah in get_favourite_surahs():
                         if surah.get_num() == int(user_input):
                             exists = True
                             break
                     if exists:
-                        print("This surah is already in your favorites.")
+                        print("This surah is already in your favourites.")
                         continue
                     else:
-                        favorite_surahs.append(surahs[int(user_input) - 1])
-                        print(f"{convert(surahs[int(user_input) - 1])} has been added to your favorites.")
+                        get_favourite_surahs().append(surahs[int(user_input) - 1])
+                        print(f"{convert(surahs[int(user_input) - 1])} has been added to your favourites.")
                         continue
                 elif user_input == 'q':
+                    save_favourites() 
                     return
                 elif user_input == 'm':
+                    save_favourites() 
                     break # go back to main menu
                 else: 
                     print("Invalid surah number. Please enter a number between 1 and 114.")
                     continue
-        elif user_input == '6': # quit
-            break
+        elif user_input == '6': # delete a surah from the favourite surahs list
+            repeat = True
+            while repeat:
+                user_input = input("Enter the surah number to remove from favourites ['q' to Quit, 'm' for Menu]: ")
+                if user_input.isdigit() and int(user_input) >= 1 and int(user_input) <= 114:
+                    exists = False
+                    for surah in get_favourite_surahs():
+                        if surah.get_num() == int(user_input):
+                            exists = True
+                            break
+                    if exists:
+                        get_favourite_surahs().remove(surahs[int(user_input) - 1])
+                        print(f"{convert(surahs[int(user_input) - 1])} has been removed from your favourites.")
+                        continue
+                    else:
+                        print("This surah is not in your favourites.")
+                elif user_input == 'q':
+                    save_favourites() 
+                    return
+                elif user_input == 'm':
+                    save_favourites() 
+                    break # go back to main menu
+                else: 
+                    print("Invalid surah number. Please enter a number between 1 and 114.")
+                    continue
         elif user_input == 'q': # quit 
             break
         else: 
