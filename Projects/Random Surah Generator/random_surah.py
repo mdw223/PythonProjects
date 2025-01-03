@@ -1,30 +1,21 @@
-# ask user whether he wants to select only from a certain juz
-
-''' or anywhere in the Quran...
-
-make it so the surah with smaller number is displayed to be read first
-
-can have favorites folder of surahs to randomly pick from 
-
+''' 
+make a login page for the user to login and save their fav surahs
 
 make the UI to make it look nice and interactive
 
-also allow for a certain ayah in that surah like kursee 
-
 can upload it to app store
-
-a person can have an account to save their favs
 
 can have a recently read folder of surahs.
 
 Can also make a salah couter app for make ups'''
 
 
-from Surah import Surah # import Surah class from Surah.py file
+from numpy import choose
+from Surah import * # import everything from Surah.py file
 
 from Juz import Juz # import Juz class from Juz.py
 
-    
+favorite_surahs = [] # list of favorite surahs
 
 # List of Juz objects with flipped start and end Surah numbers and no Ayah numbers
 juz_list = [
@@ -201,7 +192,7 @@ def choose_surah_num(start, end):
         mid = int((start + end) / 2)
         return [random.randint(start, mid), random.randint(mid + 1, end)]
 
-def choose_surahs(start_juz, end_juz):
+def choose_juz(start_juz, end_juz):
     #gets the surah range based on given juz start and end 
     s = juz_list[start_juz].get_start_surah() 
     e = juz_list[end_juz].get_end_surah()
@@ -211,16 +202,29 @@ def choose_surahs(start_juz, end_juz):
         s = e
         e = temp
     
-    print(f"Look between: the start surah number: {s}. The end surah number: {e} ")
+    return choose_surahs(s, e)
+
+def choose_surahs(s, e):    
+    # print(f"Look between: the start surah number: {s}. The end surah number: {e} ")
 
     surah_pair = choose_surah_num(s, e)
     surah_1 = surahs[surah_pair[0] - 1] # surah list is zero indexed 
     surah_2 = surahs[surah_pair[1] - 1]
-    print(f"surah_1 is {surah_1.get_num()}")
-    print(f"surah_2 is {surah_2.get_num()}")
+    #print(f"surah_1 is {surah_1.get_num()}")
+    # print(f"surah_2 is {surah_2.get_num()}")
     return [surah_1, surah_2]
 
-    
+def choose_favorites():
+    surah_pair = choose_surah_num(0, len(favorite_surahs) - 1)
+    return [favorite_surahs[surah_pair[0]], favorite_surahs[surah_pair[1]]]
+
+def display_favourites():
+    if len(favorite_surahs) == 0:
+        print("You don't have any favorite surahs yet.")
+    else:
+        print("Your favorite surahs are:")
+        for surah in favorite_surahs:
+            print(f"\t{convert(surah)}")
 
 def convert(surah):
     surah_num = surah.get_num()
@@ -230,42 +234,126 @@ def convert(surah):
     surah = reshaped_text[::-1] # slice backwards  
     return f"{str(surah_num)} {surah_eng} {surah}"   
 
+def output_surah_pair(surah_pair):
+    if surah_pair[0] == surah_pair[1]:
+        print(f'Read from surah {convert(surah_pair[0])}')  
+    else:
+        print(f'Read surahs {convert(surah_pair[0])} and {convert(surah_pair[1])}')
+
 def user():
-        cont = True
-        while cont:
-            #map iterates through the parts of the string and initializes them for us 
+    cont = True
+    while cont:
+        #map iterates through the parts of the string and initializes them for us 
+        start_juz = 1
+        end_juz = 30
+        surah_pair = None
+        menu = "\nMenu: (Enter a number or 'q' to Quit)\
+            \n1. Choose a range of juz to select from\
+            \n2. Choose a range of surahs to select from\
+            \n3. Choose from your favorite surahs\
+            \n4. View your favorite surahs\
+            \n5. Add a surah to your favorites\
+            \n6. Quit\
+            \nEnter your choice: "
+        user_input = input(menu)
+        if user_input == '1':
             start_juz = 1
             end_juz = 30
-            try:
-                user_input = input("Choose a range of juz to choose from (1-30) or 'q' to quit: ")
-                if user_input == 'q':
-                    cont = False
-                    break
-                elif user_input.isdigit() and int(user_input) >= 1 and int(user_input) <= 30:
-                    # if they input a single number like 1 then only choose from juz 1  
-                    start_juz = int(user_input)
-                    end_juz = int(user_input)
-                else:
-                    start_juz, end_juz = map(int, user_input.split('-'))
-                    if (start_juz > end_juz) or (start_juz < 1) or (start_juz > 30) or (end_juz < 1) or (end_juz > 30):
-                        raise FormatException()
-            
-            except FormatException as e: # if in wrong format, will come here 
-                print(e)
+            repeat = True
+            while repeat:
+                try: 
+                    user_input = input("Choose a range of juz to choose from (1-30) ['q' to Quit, 'm' for Menu]: ")
+                    
+                    if user_input == 'q':
+                        return # exits the function 
+                    elif user_input == 'm':
+                        break
+                    elif user_input.isdigit() and int(user_input) >= 1 and int(user_input) <= 30:
+                        # if they input a single number like 1 then only choose from juz 1  
+                        start_juz = int(user_input)
+                        end_juz = int(user_input)
+                    else:
+                        start_juz, end_juz = map(int, user_input.split('-'))
+                        if (start_juz > end_juz) or (start_juz < 1) or (start_juz > 30) or (end_juz < 1) or (end_juz > 30):
+                            raise FormatException()
+                    
+                    surah_pair = choose_juz(start_juz - 1, end_juz - 1) # the list is 0 indexed
+                    output_surah_pair(surah_pair)
+                except FormatException as e: # if in wrong format, will come here 
+                    print(e)
+                    continue
+                except:
+                    print("Incorrect format. An example of a correct format is '5-10'.")
+                    # pass statement in Python does not skip to the next iteration of a loop. Instead, it is a null operation; when it is executed, nothing happens.
+                    continue # If you want to skip to the next iteration of a loop, you should use the continue statement.                    
+        elif user_input == '2':
+            repeat = True
+            while repeat:
+                try: 
+                    user_input = input("Choose a range of surahs to choose from (1-114) ['q' to Quit, 'm' for Menu]: ")
+                    if user_input == 'q':
+                        return 
+                    elif user_input == 'm':
+                        break
+                    else:
+                        start_surah, end_surah = map(int, user_input.split('-'))
+
+                        if (start_surah > end_surah) or (start_surah < 1) or (start_surah > 114) or (end_surah < 1) or (end_surah > 114):
+                            raise FormatException()
+                    
+                        
+                        surah_pair = choose_surahs(start_surah, end_surah)
+                        output_surah_pair(surah_pair)
+                except FormatException as e: # if in wrong format, will come here 
+                    print(e)
+                    continue
+                except:
+                    print("Incorrect format. An example of a correct format is '5-10'.")
+                    continue 
+        elif user_input == '3': # choose from the favorite_surahs list
+            if len(favorite_surahs) == 0:
+                print("You don't have any favorite surahs yet.")
                 continue
-            except:
-                print("Incorrect format. An example of a correct format is '5-10'.")
-                # pass statement in Python does not skip to the next iteration of a loop. Instead, it is a null operation; when it is executed, nothing happens.
-                continue # If you want to skip to the next iteration of a loop, you should use the continue statement.
-
-            surah_pair = choose_surahs(start_juz - 1, end_juz - 1) # the list is 0 indexed
-            
-            if surah_pair[0] == surah_pair[1]:
-                print(f'Read from surah {convert(surah_pair[0])}')  
             else:
-                print(f'Read surahs {convert(surah_pair[0])} and {convert(surah_pair[1])}')  
+                surah_pair = choose_favorites()
+                output_surah_pair(surah_pair)
+        elif user_input == '4': # display favorite surahs
+            display_favourites()
+            continue
+        elif user_input == '5': # add a surah to the favorite_surahs list
+            repeat = True
+            while repeat:
+                user_input = input("Enter the surah number you would like to add to your favorites ['q' to Quit, 'm' for Menu]: ")
+                if user_input.isdigit() and int(user_input) >= 1 and int(user_input) <= 114:
+                    exists = False
+                    for surah in favorite_surahs:
+                        if surah.get_num() == int(user_input):
+                            exists = True
+                            break
+                    if exists:
+                        print("This surah is already in your favorites.")
+                        continue
+                    else:
+                        favorite_surahs.append(surahs[int(user_input) - 1])
+                        print(f"{convert(surahs[int(user_input) - 1])} has been added to your favorites.")
+                        continue
+                elif user_input == 'q':
+                    return
+                elif user_input == 'm':
+                    break # go back to main menu
+                else: 
+                    print("Invalid surah number. Please enter a number between 1 and 114.")
+                    continue
+        elif user_input == '6': # quit
+            break
+        elif user_input == 'q': # quit 
+            break
+        else: 
+            print("Invalid input. Please enter a number between 1 and 6.")
+            continue 
         
-
+class BreakOuterLoop(Exception):
+    pass
         
 user()
 
